@@ -1,0 +1,3 @@
+/* List databases */
+SELECT DBS.name,DBS.create_date,DBS.state_desc,DBS.recovery_model_desc,MAS.type_desc,MAS.physical_name,MAS.size,DBS.replica_id FROM sys.master_files MAS
+JOIN sys.databases DBS ON DBS.database_id = MAS.database_id
