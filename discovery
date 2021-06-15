@@ -49,3 +49,17 @@ avg_fragmentation_in_percent,avg_page_space_used_in_percent,page_count
 FROM sys.dm_db_index_physical_stats
 (DB_ID(N'<YOUR DATABASE>'), NULL, NULL, NULL , 'SAMPLED')
 ORDER BY avg_fragmentation_in_percent DESC
+
+/* List Logins */
+select sp.name as login,
+       sp.type_desc as login_type,
+       sl.password_hash,
+       sp.create_date,
+       sp.modify_date,
+       case when sp.is_disabled = 1 then 'Disabled'
+            else 'Enabled' end as status
+from sys.server_principals sp
+left join sys.sql_logins sl
+          on sp.principal_id = sl.principal_id
+where sp.type not in ('G', 'R')
+order by sp.name;
