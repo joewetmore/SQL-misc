@@ -9,7 +9,6 @@ Select @@version
 SELECT DBS.name,DBS.create_date,DBS.state_desc,DBS.recovery_model_desc,MAS.type_desc,MAS.physical_name,MAS.size,DBS.replica_id FROM sys.master_files MAS
 JOIN sys.databases DBS ON DBS.database_id = MAS.database_id
 
-
 /* Service Check */
 exec master.dbo.xp_servicecontrol 'QUERYSTATE', 'MSSQLServer'
 exec master.dbo.xp_servicecontrol 'QUERYSTATE', 'SQLServerAgent'
@@ -34,6 +33,11 @@ WHERE recovery_model = 1
 
 /* Drivespace Check */
 exec master.dbo.xp_fixeddrives
+
+/* Get Default Paths */
+SELECT
+SERVERPROPERTY('InstanceDefaultDataPath') AS InstanceDefaultDataPath,
+SERVERPROPERTY('InstanceDefaultLogPath') AS InstanceDefaultLogPath
 
 /* Memory Check */
 SELECT available_physical_memory_kb/1024 as "Total Memory MB",
@@ -63,3 +67,38 @@ left join sys.sql_logins sl
           on sp.principal_id = sl.principal_id
 where sp.type not in ('G', 'R')
 order by sp.name;
+
+/* Get Server Properties */
+USE master
+GO
+EXEC xp_msver "ProductName"
+  ,"ProductVersion"
+  ,"Language"
+  ,"Platform"
+  ,"WindowsVersion"
+  ,"PhysicalMemory"
+  ,"ProcessorCount"
+GO
+
+/* Get TCP IP ports (for SQL 2005 and up) */
+DECLARE @InstanceName nvarchar(50)
+DECLARE @value VARCHAR(100)
+DECLARE @RegKey_InstanceName nvarchar(500)
+DECLARE @RegKey nvarchar(500)
+SET @InstanceName=CONVERT(nVARCHAR,isnull(SERVERPROPERTY('INSTANCENAME'),'MSSQLSERVER'))
+if(SELECT Convert(varchar(1),(SERVERPROPERTY('ProductVersion'))))<>8
+BEGIN
+SET @RegKey_InstanceName='SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL'
+EXECUTE xp_regread
+  @rootkey = 'HKEY_LOCAL_MACHINE',
+  @key = @RegKey_InstanceName,
+  @value_name = @InstanceName,
+  @value = @value OUTPUT
+SET @RegKey='SOFTWARE\Microsoft\Microsoft SQL Server\'+@value+'\MSSQLServer\SuperSocketNetLib\TCP\IPAll'
+EXECUTE xp_regread
+  @rootkey = 'HKEY_LOCAL_MACHINE',
+  @key = @RegKey,
+  @value_name = 'TcpPort',
+  @value = @value OUTPUT
+Select @@SERVERNAME as ServerName,@value as PortNumber
+END
