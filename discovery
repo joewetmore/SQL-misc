@@ -1,20 +1,30 @@
 /* show current sessions */
 sp_who
 
+
+
 /* List Instances */
 select * from sys.servers
  
+ 
+ 
 /* Identify version */
 Select @@version
+ 
+ 
  
 /* List databases */
 SELECT DBS.name,DBS.create_date,DBS.state_desc,DBS.recovery_model_desc,MAS.type_desc,MAS.physical_name,MAS.size,DBS.replica_id FROM sys.master_files MAS
 JOIN sys.databases DBS ON DBS.database_id = MAS.database_id
 
+
+
 /* Service Check */
 exec master.dbo.xp_servicecontrol 'QUERYSTATE', 'MSSQLServer'
 exec master.dbo.xp_servicecontrol 'QUERYSTATE', 'SQLServerAgent'
 exec master.dbo.xp_servicecontrol 'QUERYSTATE', 'SQLBrowser'
+
+
 
 /* Backup Check  ??? */
 SELECT d.name AS "Database",
@@ -33,21 +43,31 @@ LEFT JOIN (SELECT database_name,type,MAX(backup_finish_date) backupdate FROM bac
 WHERE recovery_model = 1
  AND (backupdate IS NULL OR backupdate < getdate()-1)
 
+
+
 /* Drivespace Check */
 exec master.dbo.xp_fixeddrives
+
+
 
 /* Get Default Paths */
 SELECT
 SERVERPROPERTY('InstanceDefaultDataPath') AS InstanceDefaultDataPath,
 SERVERPROPERTY('InstanceDefaultLogPath') AS InstanceDefaultLogPath
 
+
+
 /* Memory Check */
 SELECT available_physical_memory_kb/1024 as "Total Memory MB",
  available_physical_memory_kb/(total_physical_memory_kb*1.0)*100 AS "% Memory Free"
 FROM sys.dm_os_sys_memory
 
+
+
 /* Transaction Log Check */
 DBCC SQLPERF(LOGSPACE)
+
+
 
 /* Index Fragmentation Check */
 SELECT OBJECT_NAME(OBJECT_ID), index_id,index_type_desc,index_level,
@@ -55,6 +75,8 @@ avg_fragmentation_in_percent,avg_page_space_used_in_percent,page_count
 FROM sys.dm_db_index_physical_stats
 (DB_ID(N'<YOUR DATABASE>'), NULL, NULL, NULL , 'SAMPLED')
 ORDER BY avg_fragmentation_in_percent DESC
+
+
 
 /* List Logins */
 select sp.name as login,
@@ -70,6 +92,8 @@ left join sys.sql_logins sl
 where sp.type not in ('G', 'R')
 order by sp.name;
 
+
+
 /* Get Server Properties */
 USE master
 GO
@@ -81,6 +105,8 @@ EXEC xp_msver "ProductName"
   ,"PhysicalMemory"
   ,"ProcessorCount"
 GO
+
+
 
 /* Get TCP IP ports (for SQL 2005 and up) */
 DECLARE @InstanceName nvarchar(50)
@@ -107,6 +133,8 @@ END
 
 
 
+
+/* Get SQL Configuration Settings */
 /* https://www.mssqltips.com/sqlservertip/6090/sql-server-configuration-settings-query/ */
 
 CREATE TABLE #CPUValues(
@@ -162,3 +190,13 @@ LEFT JOIN (
  
 DROP TABLE #CPUValues
 DROP TABLE #MemoryValues
+
+
+
+/* Availability Groups */
+
+/* Get AG Listeners */
+Select * From sys.availability_group_listeners
+
+
+
