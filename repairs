@@ -1,0 +1,11 @@
+/* fixing a database in 'Suspect' status. https://www.emaildoctor.org/blog/suspect-database-in-sql-server-error/ 
+Run these lines sequentially for each DB in "(Suspect)" status. */
+
+EXEC sp_resetstatus ‘db_name’;
+ALTER DATABASE db_name SET EMERGENCY
+DBCC CHECKDB (‘database_name’)
+ALTER DATABASE database_name SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+DBCC CHECKDB (‘database_name’, REPAIR_ALLOW_DATA_LOSS)
+ALTER DATABASE database_name SET MULTI_USER
+
+
