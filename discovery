@@ -1,3 +1,5 @@
+/* show current sessions */
+sp_who
 
 /* List Instances */
 select * from sys.servers
