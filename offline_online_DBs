@@ -1,0 +1,16 @@
+/* Script To Bring All User Databases Offline in SQL Server
+http://www.techbrothersit.com/2014/02/dba-generate-script-to-bring-all-user.html */
+
+SELECT 'ALTER DATABASE ['+name+'] SET OFFLINE WITH NO_WAIT'+CHAR(10)+' GO' FROM 
+MASTER.sys.databases
+WHERE name NOT IN ('master','tempdb','model','msdb','distribution')
+
+
+/* Script To Bring All User Databases Online in SQL Server
+http://www.techbrothersit.com/2014/02/dba-generate-script-to-bring-all-user_8.html */
+
+SELECT 'ALTER DATABASE ['+name+'] SET ONLINE'+CHAR(10)+' GO' 
+FROM MASTER.sys.databases
+WHERE name NOT IN ('master','tempdb','model','msdb','distribution')
+AND state_desc='OFFLINE'
+
