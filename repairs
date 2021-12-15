@@ -9,3 +9,12 @@ DBCC CHECKDB (‘database_name’, REPAIR_ALLOW_DATA_LOSS)
 ALTER DATABASE database_name SET MULTI_USER
 
 
+
+ALTER DATABASE emergencydemo SET EMERGENCY;
+Go
+ALTER DATABASE emergencydemo set single_user
+Go
+DBCC CHECKDB (emergencydemo, REPAIR_ALLOW_DATA_LOSS) WITH ALL_ERRORMSGS;
+Go
+ALTER DATABASE emergencydemo set multi_user
+Go
