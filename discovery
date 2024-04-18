@@ -227,3 +227,21 @@ ORDER BY
 
 
 
+/* Migrate a user DB */
+USE master;  
+GO  
+ALTER DATABASE TEST2
+SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+GO
+EXEC sp_detach_db @dbname = N'TEST2', @skipchecks = 'true';  
+GO
+
+
+USE master;  
+GO  
+CREATE DATABASE TEST2   
+    ON (FILENAME = 'E:\TEST2\TEST2.mdf'),  
+    (FILENAME = 'E:\TEST2\TEST2_Log.ldf')  
+    FOR ATTACH;  
+GO
+
