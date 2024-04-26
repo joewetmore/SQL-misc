@@ -236,6 +236,8 @@ GO
 EXEC sp_detach_db @dbname = N'TEST2', @skipchecks = 'true';  
 GO
 
+/* CMD shell */
+robocopy C:\TEST2\*.* E:\TEST2\*.* /copy:datso /r:0 /w:0
 
 USE master;  
 GO  
