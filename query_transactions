@@ -1,0 +1,55 @@
+/* SQL Server transactions per day/hour/minute using sys.dm_os_performance_counters */
+/* http://www.sqlfingers.com/2019/01/this-post-will-help-you-query-your-sql.html */
+
+       -- declarations
+       DECLARE      
+              @Days SMALLINT,
+              @Hours INT,
+              @Minutes BIGINT,
+              @LastRestart DATETIME;
+
+       -- get last restart date
+       SELECT 
+              @Days = DATEDIFF(D, create_date, GETDATE()),@LastRestart = create_date
+       FROM   
+              sys.databases
+       WHERE  
+              database_id = 2;
+
+       -- collect days/hours since last restart
+       SELECT @Days = CASE WHEN @Days = 0 THEN 1 ELSE @Days END;
+       SELECT @Hours = @Days * 24;
+       SELECT @Minutes = @Hours * 60;
+
+
+       -- trans since last restart
+       SELECT 
+              @LastRestart [LastRestart],
+              @@servername [Instance],
+              cntr_value [TotalTransSinceLastRestart],
+              cntr_value / @Days   [AvgTransPerDay],
+              cntr_value / @Hours  [AvgTransPerHour],
+              cntr_value / @Minutes [AvgTransPerMinute]
+       FROM
+              sys.dm_os_performance_counters
+       WHERE  
+              counter_name = 'Transactions/sec'
+              AND instance_name = '_Total';
+
+
+       -- trans since last restart per database
+       SELECT 
+              @LastRestart [LastRestart],
+              @@servername [Instance],
+              instance_name [Database_Name],
+              cntr_value [TotalTransSinceLastRestart],
+              cntr_value / @Days [AvgTransPerDay],
+              cntr_value / @Hours  [AvgTransPerHour],
+              cntr_value / @Minutes [AvgTransPerMinute]
+       FROM  
+              sys.dm_os_performance_counters
+       WHERE  
+              counter_name = 'Transactions/sec'
+              AND instance_name <> '_Total'
+       ORDER BY
+              cntr_value DESC;
