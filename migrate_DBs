@@ -7,8 +7,10 @@ GO
 EXEC sp_detach_db @dbname = N'TEST2', @skipchecks = 'true';  
 GO
 
-/* CMD shell */
-robocopy C:\TEST2\*.* E:\TEST2\*.* /copy:datso /r:0 /w:0
+/* move files */
+robocopy "E:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA" "P:\data" Insignificant_Data_01.mdf /copy:datso /r:0 /w:0
+robocopy "E:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA" "I:\log" Insignificant_Data_01_log.ldf /copy:datso /r:0 /w:0
+
 
 USE master;  
 GO  
@@ -17,3 +19,35 @@ CREATE DATABASE TEST2
     (FILENAME = 'E:\TEST2\TEST2_Log.ldf')  
     FOR ATTACH;  
 GO
+
+
+
+
+
+
+/*    OR    */
+
+
+
+
+
+
+
+ALTER DATABASE Insignificant_Data_01   
+    MODIFY FILE ( NAME = Insignificant_Data_01,   
+                  FILENAME = 'p:\data\Insignificant_Data_01.mdf');  
+GO
+ 
+ALTER DATABASE Insignificant_Data_01   
+    MODIFY FILE ( NAME = Insignificant_Data_01_Log,   
+                  FILENAME = 'i:\log\Insignificant_Data_01_log.ldf');  
+GO
+
+ALTER DATABASE Insignificant_Data_01 SET OFFLINE;  
+GO
+
+/* move files */
+robocopy "E:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA" "P:\data" Insignificant_Data_01.mdf /copy:datso /r:0 /w:0
+robocopy "E:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA" "I:\log" Insignificant_Data_01_log.ldf /copy:datso /r:0 /w:0
+
+ALTER DATABASE Insignificant_Data_01 SET ONLINE;
