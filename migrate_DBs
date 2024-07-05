@@ -22,14 +22,7 @@ GO
 
 
 
-
-
-
 /*    OR    */
-
-
-
-
 
 
 
@@ -51,3 +44,35 @@ robocopy "E:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA" 
 robocopy "E:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA" "I:\log" Insignificant_Data_01_log.ldf /copy:datso /r:0 /w:0
 
 ALTER DATABASE Insignificant_Data_01 SET ONLINE;
+
+
+
+/* Migrate the TempDB */
+
+Use master
+GO
+SELECT
+name AS [LogicalName]
+,physical_name AS [Location]
+,state_desc AS [Status]
+FROM sys.master_files
+WHERE database_id = DB_ID(N'tempdb');
+GO
+
+USE master;
+GO
+ALTER DATABASE tempdb
+MODIFY FILE (NAME = tempdev, FILENAME = 'T:\TEMPDB\tempdb.mdf');
+GO
+ALTER DATABASE tempdb
+MODIFY FILE (NAME = templog, FILENAME = 'T:\TEMPDB\templog.ldf');
+GO
+ALTER DATABASE tempdb
+MODIFY FILE (NAME = temp2, FILENAME = 'T:\TEMPDB\tempdb_mssql_2.ndf');
+GO
+ALTER DATABASE tempdb
+MODIFY FILE (NAME = temp3, FILENAME = 'T:\TEMPDB\tempdb_mssql_3.ndf');
+GO
+ALTER DATABASE tempdb
+MODIFY FILE (NAME = temp4, FILENAME = 'T:\TEMPDB\tempdb_mssql_4.ndf');
+GO
